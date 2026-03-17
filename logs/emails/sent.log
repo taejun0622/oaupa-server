@@ -1,0 +1,73 @@
+
+============================================================
+EMAIL SENT at 2026-03-17T09:36:32.831200+00:00
+To: forgot@test.com
+Subject: Reset your OAUPA password
+Template: password_reset
+────────────────────────────────────────────────────────────
+You requested a password reset.
+
+Click the link below to reset your password:
+http://localhost:3000/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNmU3YTk3Yi00MmRkLTRjZDYtYWE2Zi1jMjEzYzgzNzkxZGIiLCJ0eXBlIjoicGFzc3dvcmRfcmVzZXQiLCJleHAiOjE3NzM3NDM3OTJ9.SXOGUrYeHXf6U3qLw2rwMZtEErTHgJbqgZ0jXzRI5xA
+
+This link expires in 1 hour.
+If you didn't request this, you can safely ignore this email.
+============================================================
+
+============================================================
+EMAIL SENT at 2026-03-17T09:38:37.445471+00:00
+To: forgot@test.com
+Subject: Reset your OAUPA password
+Template: password_reset
+────────────────────────────────────────────────────────────
+You requested a password reset.
+
+Click the link below to reset your password:
+http://localhost:3000/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NDFiNDIzMy00ZTFkLTQwMzMtOTRjNy1mNDEwZDgyMzEyMzgiLCJ0eXBlIjoicGFzc3dvcmRfcmVzZXQiLCJleHAiOjE3NzM3NDM5MTd9.5Lt-tbPa4E-kuFTlH9aqIQjwBPLSH9TKlU69eurthn8
+
+This link expires in 1 hour.
+If you didn't request this, you can safely ignore this email.
+============================================================
+
+============================================================
+EMAIL SENT at 2026-03-17T09:38:40.905852+00:00
+To: auth-c11b232e@test.com
+Subject: Verify your OAUPA email address
+Template: email_verification
+────────────────────────────────────────────────────────────
+Welcome to OAUPA!
+
+Click the link below to verify your email address:
+http://localhost:3000/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NWQ1MDBiNC00YTdiLTQ0N2QtOWYzNi04YTE4MzYxMzkxNWYiLCJ0eXBlIjoiZW1haWxfdmVyaWZpY2F0aW9uIiwiZXhwIjoxNzczODI2NzIwfQ.lprjlPfE2hcaU97tWFq1Lr1AHn7cnmpn4wUeCBowN0w
+
+This link expires in 24 hours.
+============================================================
+
+============================================================
+EMAIL SENT at 2026-03-17T09:45:50.764514+00:00
+To: forgot@test.com
+Subject: Reset your OAUPA password
+Template: password_reset
+────────────────────────────────────────────────────────────
+You requested a password reset.
+
+Click the link below to reset your password:
+http://localhost:3000/reset-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YzRkMzk1My05NGMwLTQ3Y2UtYTk4Yy1lZTQ5YTNlMjU5ZDUiLCJ0eXBlIjoicGFzc3dvcmRfcmVzZXQiLCJleHAiOjE3NzM3NDQzNTB9.ffFFmfmt_6EHNw7JP4wIBBbxWVhm-UIJ-cZwe1vJxIg
+
+This link expires in 1 hour.
+If you didn't request this, you can safely ignore this email.
+============================================================
+
+============================================================
+EMAIL SENT at 2026-03-17T09:45:54.141750+00:00
+To: auth-4bec4c88@test.com
+Subject: Verify your OAUPA email address
+Template: email_verification
+────────────────────────────────────────────────────────────
+Welcome to OAUPA!
+
+Click the link below to verify your email address:
+http://localhost:3000/verify-email?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjZDc1MjI5ZC00NTg4LTQ0OTUtOTg4MC05YTI5Mzc2MzlhNTQiLCJ0eXBlIjoiZW1haWxfdmVyaWZpY2F0aW9uIiwiZXhwIjoxNzczODI3MTU0fQ.aNGUZVqvdRo-dpNjX-dJvGuEe5xt6D_wGHF_WeByLIM
+
+This link expires in 24 hours.
+============================================================

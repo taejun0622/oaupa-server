@@ -1,0 +1,55 @@
+import httpx
+
+from app.providers.base import AccountInfo, OAuthProviderBase, TokenResponse
+from app.providers._http import build_authorization_url, exchange_code_standard, refresh_token_standard
+
+
+class SalesforceProvider(OAuthProviderBase):
+    provider_id = "salesforce"
+
+    def get_authorization_url(
+        self, state: str, scopes: list[str], redirect_uri: str, code_challenge: str | None = None
+    ) -> str:
+        return build_authorization_url(
+            auth_url=self.auth_url,
+            client_id=self.client_id,
+            redirect_uri=redirect_uri,
+            state=state,
+            scopes=scopes or self.default_scopes,
+            code_challenge=code_challenge,
+            extra_params=self.extra_auth_params,
+        )
+
+    async def exchange_code(
+        self, code: str, redirect_uri: str, code_verifier: str | None = None
+    ) -> TokenResponse:
+        return await exchange_code_standard(
+            self.token_url, self.client_id, self.client_secret, code, redirect_uri, code_verifier
+        )
+
+    async def refresh_token(self, refresh_token: str) -> TokenResponse:
+        return await refresh_token_standard(
+            self.token_url, self.client_id, self.client_secret, refresh_token
+        )
+
+    async def revoke_token(self, token: str) -> bool:
+        if not self.revoke_url:
+            return False
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(self.revoke_url, data={"token": token})
+            return resp.status_code == 200
+
+    async def get_account_info(self, access_token: str) -> AccountInfo | None:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://login.salesforce.com/services/oauth2/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            if resp.status_code != 200:
+                return None
+            data = resp.json()
+            return AccountInfo(
+                account_id=data.get("user_id", ""),
+                email=data.get("email"),
+                display_name=data.get("name"),
+            )
