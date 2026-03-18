@@ -6,6 +6,8 @@ services:
       - ./app:/app/app
       - ./alembic:/app/alembic
       - ./scripts:/app/scripts
+      - ./tests:/app/tests
+      - ./pyproject.toml:/app/pyproject.toml
     ports:
       - "8000:8000"
     env_file: .env
