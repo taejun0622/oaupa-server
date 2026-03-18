@@ -8,10 +8,10 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select, delete
-from sqlalchemy.orm import joinedload
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.config import settings
 from app.core.encryption import decrypt, encrypt, get_current_key_version
-from app.db.session import async_session_factory
 from app.models.oauth_connection import OAuthConnection
 from app.models.oauth_provider import OAuthProvider
 from app.models.oauth_state import OAuthState
@@ -28,13 +28,20 @@ def _run_async(coro):
         loop.close()
 
 
+def _make_session_factory() -> async_sessionmaker[AsyncSession]:
+    """Create a fresh engine + session factory for each task to avoid event loop conflicts."""
+    engine = create_async_engine(settings.database_url, pool_pre_ping=True)
+    return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
 @celery_app.task(name="app.workers.token_refresh.refresh_expiring_tokens")
 def refresh_expiring_tokens():
     _run_async(_refresh_expiring_tokens())
 
 
 async def _refresh_expiring_tokens():
-    async with async_session_factory() as session:
+    session_factory = _make_session_factory()
+    async with session_factory() as session:
         # Find tokens expiring within their provider's buffer time
         now = datetime.now(timezone.utc)
 
@@ -110,7 +117,8 @@ def cleanup_expired_states():
 
 
 async def _cleanup_expired_states():
-    async with async_session_factory() as session:
+    session_factory = _make_session_factory()
+    async with session_factory() as session:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
         await session.execute(
             delete(OAuthState).where(OAuthState.expires_at < cutoff)

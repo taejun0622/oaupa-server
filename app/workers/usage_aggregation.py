@@ -4,8 +4,9 @@ import asyncio
 from datetime import date, datetime, timezone
 
 from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.db.session import async_session_factory
+from app.config import settings
 from app.models.oauth_connection import OAuthConnection
 from app.models.project import Project
 from app.models.usage import UsageRecord
@@ -20,6 +21,11 @@ def _run_async(coro):
         loop.close()
 
 
+def _make_session_factory() -> async_sessionmaker[AsyncSession]:
+    engine = create_async_engine(settings.database_url, pool_pre_ping=True)
+    return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
 @celery_app.task(name="app.workers.usage_aggregation.aggregate_daily_usage")
 def aggregate_daily_usage():
     _run_async(_aggregate_daily_usage())
@@ -28,7 +34,8 @@ def aggregate_daily_usage():
 async def _aggregate_daily_usage():
     today = date.today()
 
-    async with async_session_factory() as session:
+    session_factory = _make_session_factory()
+    async with session_factory() as session:
         # Get all active projects
         result = await session.execute(
             select(Project.id).where(Project.is_active.is_(True))
