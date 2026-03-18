@@ -8,8 +8,9 @@ from datetime import datetime, timedelta, timezone
 
 import httpx
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.db.session import async_session_factory
+from app.config import settings
 from app.models.webhook import Webhook, WebhookDelivery
 from app.workers.celery_app import celery_app
 
@@ -25,13 +26,19 @@ def _run_async(coro):
         loop.close()
 
 
+def _make_session_factory() -> async_sessionmaker[AsyncSession]:
+    engine = create_async_engine(settings.database_url, pool_pre_ping=True)
+    return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
 @celery_app.task(name="app.workers.webhook_dispatch.dispatch_webhook", bind=True, max_retries=5)
 def dispatch_webhook(self, delivery_id: str):
     _run_async(_dispatch_webhook(self, delivery_id))
 
 
 async def _dispatch_webhook(task, delivery_id: str):
-    async with async_session_factory() as session:
+    session_factory = _make_session_factory()
+    async with session_factory() as session:
         result = await session.execute(
             select(WebhookDelivery).where(WebhookDelivery.id == delivery_id)
         )
