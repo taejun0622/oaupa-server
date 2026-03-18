@@ -13,7 +13,14 @@ logger = logging.getLogger(__name__)
 
 _EMAIL_LOG_DIR = Path("logs/emails")
 
-_ses_client = boto3.client("ses", region_name=settings.ses_region)
+_ses_client = None
+
+
+def _get_ses_client():
+    global _ses_client
+    if _ses_client is None:
+        _ses_client = boto3.client("ses", region_name=settings.ses_region)
+    return _ses_client
 
 
 def _log_email(to: str, subject: str, body: str, template: str | None) -> None:
@@ -55,7 +62,7 @@ async def send_email(
         return
 
     try:
-        _ses_client.send_email(
+        _get_ses_client().send_email(
             Source=settings.ses_from_email,
             Destination={"ToAddresses": [to]},
             Message={
