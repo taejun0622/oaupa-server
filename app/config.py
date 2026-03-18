@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     stripe_price_starter: str = ""
     stripe_price_pro: str = ""
 
+    # AWS SES
+    ses_region: str = "us-east-1"
+    ses_from_email: str = ""
+
     # CORS
     cors_origins: list[str] = ["http://localhost:3000"]
     cors_allow_methods: list[str] = ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"]

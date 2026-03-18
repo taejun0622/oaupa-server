@@ -1,8 +1,11 @@
-"""Fake email service — logs emails to console/file. Swap for a real provider later."""
+"""Email service using AWS SES."""
 
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+
+import boto3
+from botocore.exceptions import ClientError
 
 from app.config import settings
 
@@ -10,22 +13,11 @@ logger = logging.getLogger(__name__)
 
 _EMAIL_LOG_DIR = Path("logs/emails")
 
+_ses_client = boto3.client("ses", region_name=settings.ses_region)
 
-async def send_email(
-    to: str,
-    subject: str,
-    body: str,
-    template: str | None = None,
-) -> None:
-    """Send an email (currently logs to console and optionally to file).
 
-    Parameters
-    ----------
-    to: recipient email address
-    subject: email subject line
-    body: plain-text or HTML body
-    template: optional template name for future provider integration
-    """
+def _log_email(to: str, subject: str, body: str, template: str | None) -> None:
+    """Log email to console and file for debugging."""
     timestamp = datetime.now(timezone.utc).isoformat()
     log_entry = (
         f"\n{'=' * 60}\n"
@@ -37,17 +29,46 @@ async def send_email(
         f"{body}\n"
         f"{'=' * 60}\n"
     )
-
     logger.info(log_entry)
-
-    # Also write to file for easy inspection during development
     try:
         _EMAIL_LOG_DIR.mkdir(parents=True, exist_ok=True)
-        log_file = _EMAIL_LOG_DIR / "sent.log"
-        with open(log_file, "a") as f:
+        with open(_EMAIL_LOG_DIR / "sent.log", "a") as f:
             f.write(log_entry)
     except OSError:
-        pass  # File logging is best-effort
+        pass
+
+
+async def send_email(
+    to: str,
+    subject: str,
+    body: str,
+    template: str | None = None,
+) -> None:
+    """Send an email via AWS SES.
+
+    In dev mode (no ses_from_email configured), falls back to logging only.
+    """
+    _log_email(to, subject, body, template)
+
+    if not settings.ses_from_email or settings.environment in ("test", "dev"):
+        logger.warning("SES skipped (env=%s) — email logged but not sent", settings.environment)
+        return
+
+    try:
+        _ses_client.send_email(
+            Source=settings.ses_from_email,
+            Destination={"ToAddresses": [to]},
+            Message={
+                "Subject": {"Data": subject, "Charset": "UTF-8"},
+                "Body": {
+                    "Text": {"Data": body, "Charset": "UTF-8"},
+                },
+            },
+        )
+        logger.info("SES email sent to %s (subject: %s)", to, subject)
+    except ClientError:
+        logger.exception("Failed to send email via SES to %s", to)
+        raise
 
 
 async def send_password_reset_email(to: str, token: str) -> None:
