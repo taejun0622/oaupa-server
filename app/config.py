@@ -17,8 +17,17 @@ class Settings(BaseSettings):
     app_name: str = "oaupa"
     debug: bool = False
 
-    # Database
-    database_url: str = "postgresql+asyncpg://oaupa:oaupa@localhost:5432/oaupa"
+    # Database — set DATABASE_URL directly, or use individual DB_* vars
+    database_url: str = ""
+    db_host: str = "localhost"
+    db_port: int = 5432
+    db_user: str = "oaupa"
+    db_password: str = "oaupa"
+    db_name: str = "oaupa"
+
+    @property
+    def sync_database_url(self) -> str:
+        return self.database_url.replace("+asyncpg", "+psycopg2")
 
     # Redis
     redis_url: str = "redis://localhost:6379/0"
@@ -41,17 +50,31 @@ class Settings(BaseSettings):
     stripe_price_starter: str = ""
     stripe_price_pro: str = ""
 
+    # AWS SES
+    ses_region: str = "us-east-1"
+    ses_from_email: str = ""
+
     # CORS
     cors_origins: list[str] = ["http://localhost:3000"]
     cors_allow_methods: list[str] = ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"]
     cors_allow_headers: list[str] = ["Authorization", "Content-Type"]
 
-    @property
-    def sync_database_url(self) -> str:
-        return self.database_url.replace("+asyncpg", "+psycopg2")
-
     @model_validator(mode="after")
     def validate_config(self) -> "Settings":
+        # Resolve database URL: DATABASE_URL > DB_HOST (if full URL) > individual parts
+        url = self.database_url
+        if not url and self.db_host.startswith("postgresql"):
+            url = self.db_host
+        if url:
+            if not url.startswith("postgresql+asyncpg://"):
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            self.database_url = url
+        else:
+            self.database_url = (
+                f"postgresql+asyncpg://{self.db_user}:{self.db_password}"
+                f"@{self.db_host}:{self.db_port}/{self.db_name}"
+            )
+
         is_prod = self.environment == "production"
 
         # JWT secret must be changed in production
